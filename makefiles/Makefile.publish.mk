@@ -329,13 +329,11 @@ sync: ## Push monorepo to origin and sync all spokes to their public repos. Use 
 			$(call log_info,Detected changes:); \
 			echo "$$CHANGED_FILES" | sed 's/^/  - /'; \
 		fi; \
-	fi; \
-	\
+	fi;
 	$(call log_step,Pushing to monorepo...)
 	@git push origin $(TARGET_BRANCH)
 	@$(call log_success,Pushed to monorepo)
-	\
-	@$(call log_step,Syncing relevant repositories...)
+	$(call log_step,Syncing relevant repositories...)
 	@synced_count=0; \
 	for spoke in $(ALL_SPOKES); do \
 		if [ -f "$(REPO_ROOT)/packages/$$spoke/package.json" ]; then \
