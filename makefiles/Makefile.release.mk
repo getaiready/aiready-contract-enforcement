@@ -244,11 +244,11 @@ release-one: ## Release one spoke: TYPE=patch|minor|major, SPOKE=core|pattern-de
 	$(call log_step,Building workspace...); \
 	$(MAKE) -C $(ROOT_DIR) build; \
 	$(call log_success,Build complete); \
-	if ! $(MAKE) -C $(ROOT_DIR) test-e2e; then \
-		$(call log_error,E2E Tests failed for @aiready/$(SPOKE). Aborting release.); \
+	if ! $(MAKE) -C $(ROOT_DIR) test-integration; then \
+		$(call log_error,Integration Tests failed for @aiready/$(SPOKE). Aborting release.); \
 		exit 1; \
 	fi; \
-	@$(call log_success,E2E Tests passed); \
+	@$(call log_success,Integration Tests passed); \
 	$(call log_step,Performing final CLI smoke test...); \
 	if ! $(MAKE) -C $(ROOT_DIR) test-verify-cli; then \
 		$(call log_error,CLI smoke test failed. Aborting release.); \
