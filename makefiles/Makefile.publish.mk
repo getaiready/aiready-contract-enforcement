@@ -321,7 +321,7 @@ publish-landing: ## Publish landing page to GitHub. Usage: make publish-landing 
 # Push to monorepo and all spoke repos
 sync: ## Push monorepo to origin and sync all spokes to their public repos. Use FORCE=true to sync all.
 	@$(call log_step,Detecting changes to sync...)
-	if [ "$(FORCE)" = "true" ]; then \
+	@if [ "$(FORCE)" = "true" ]; then \
 		CHANGED_FILES="FORCE_ALL"; \
 		$(call log_info,Force sync enabled. All repositories will be synced.); \
 	else \
@@ -335,12 +335,12 @@ sync: ## Push monorepo to origin and sync all spokes to their public repos. Use 
 			$(call log_info,Detected changes:); \
 			echo "$$CHANGED_FILES" | sed 's/^/  - /'; \
 		fi; \
-	fi; \
-	$(call log_step,Pushing to monorepo...); \
-	git push origin $(TARGET_BRANCH); \
-	$(call log_success,Pushed to monorepo); \
-	$(call log_step,Syncing relevant repositories...); \
-	synced_count=0; \
+	fi
+	@$(call log_step,Pushing to monorepo...)
+	@git push origin $(TARGET_BRANCH)
+	@$(call log_success,Pushed to monorepo)
+	@$(call log_step,Syncing relevant repositories...)
+	@synced_count=0; \
 	for spoke in $(ALL_SPOKES); do \
 		if [ -f "$(REPO_ROOT)/packages/$$spoke/package.json" ]; then \
 			should_sync=false; \
