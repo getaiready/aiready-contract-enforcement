@@ -34,6 +34,13 @@ function slugify(text: string): string {
 }
 
 /**
+ * Format a URL for markdown links, wrapping in < > if it contains parentheses
+ */
+function formatUrl(url: string): string {
+  return url.includes('(') || url.includes(')') ? `<${url}>` : url;
+}
+
+/**
  * Generate markdown from rules
  */
 function generateMarkdown(sections: Section[], metadata: Metadata): string {
@@ -102,7 +109,7 @@ function generateMarkdown(sections: Section[], metadata: Metadata): string {
 
       if (rule.references && rule.references.length > 0) {
         md += `Reference: ${rule.references
-          .map((ref) => `[${ref}](${ref})`)
+          .map((ref) => `[${ref}](${formatUrl(ref)})`)
           .join(', ')}\n\n`;
       }
     });
@@ -114,11 +121,33 @@ function generateMarkdown(sections: Section[], metadata: Metadata): string {
   if (metadata.references && metadata.references.length > 0) {
     md += `## References\n\n`;
     metadata.references.forEach((ref, i) => {
-      md += `${i + 1}. [${ref}](${ref})\n`;
+      md += `${i + 1}. [${ref}](${formatUrl(ref)})\n`;
     });
   }
 
   return md;
+}
+
+/**
+ * Format markdown using Prettier if available
+ */
+async function formatMarkdown(content: string): Promise<string> {
+  try {
+    // Attempt to import prettier dynamically from root node_modules
+    const prettier = await import('prettier');
+    return await prettier.format(content, {
+      parser: 'markdown',
+      proseWrap: 'always',
+      singleQuote: true,
+      trailingComma: 'es5',
+      printWidth: 80,
+    });
+  } catch (error) {
+    console.warn(
+      '  Warning: Prettier not found or failed to format. Writing raw markdown.'
+    );
+    return content;
+  }
 }
 
 /**
@@ -267,10 +296,11 @@ async function build() {
     }
 
     // Generate markdown
-    const markdown = generateMarkdown(sections, metadata);
+    const rawMarkdown = generateMarkdown(sections, metadata);
+    const formattedMarkdown = await formatMarkdown(rawMarkdown);
 
     // Write output
-    await writeFile(SKILL_CONFIG.outputFile, markdown, 'utf-8');
+    await writeFile(SKILL_CONFIG.outputFile, formattedMarkdown, 'utf-8');
 
     console.log(
       `  ✓ Built AGENTS.md with ${sections.length} sections and ${ruleData.length} rules`
