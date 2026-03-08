@@ -136,6 +136,8 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     });
 
+    revalidatePath('/dashboard');
+
     // Return repo with remaining count
     return NextResponse.json(
       {

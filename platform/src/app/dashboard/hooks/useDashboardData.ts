@@ -19,10 +19,22 @@ export function useDashboardData(
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Filter by deletedRepoIds to handle eventual consistency
-    const filtered = initialRepos.filter((r) => !deletedRepoIds.has(r.id));
     if (currentTeamId === 'personal') {
-      setRepos(filtered);
+      setRepos((prev) => {
+        // Filter initialRepos by deletedRepoIds
+        const filteredInitial = initialRepos.filter(
+          (r) => !deletedRepoIds.has(r.id)
+        );
+
+        // Merge: keep anything currently in state that isn't in initialRepos
+        // (to handle the gap between client update and server update)
+        const initialIds = new Set(filteredInitial.map((r) => r.id));
+        const newlyAdded = prev.filter(
+          (r) => !initialIds.has(r.id) && !deletedRepoIds.has(r.id)
+        );
+
+        return [...newlyAdded, ...filteredInitial];
+      });
     } else {
       fetchTeamRepos(currentTeamId);
     }
