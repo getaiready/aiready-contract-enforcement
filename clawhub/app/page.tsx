@@ -76,24 +76,21 @@ export default function ClawHubPage() {
       </nav>
 
       <section className="relative pt-32 pb-48 overflow-hidden border-b border-white/5">
-        {/* Cinematic Background Image - RESTORED VISIBILITY */}
-        <div className="absolute inset-0 -z-10 bg-[#0a0a0a]">
+        {/* Cinematic Background Image - MAXIMUM VISIBILITY */}
+        <div className="absolute inset-0 -z-10 bg-black">
           <Image
             src="/hero.png"
             alt="Hero Background"
             fill
-            className="object-cover opacity-80 transition-opacity duration-1000"
+            className="object-cover opacity-100"
             priority
           />
-          {/* Subtle radial mask to clear area for text - lightened */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(10,10,10,0.4)_0%,_#0a0a0a_90%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-transparent to-[#0a0a0a]" />
         </div>
 
         <div className="container mx-auto px-4 relative flex flex-col items-center text-center">
-          {/* Content Wrapper with subtle glass backdrop for text legibility over busy image */}
-          <div className="relative z-10 p-8 md:p-12 rounded-2xl max-w-5xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-cyber-purple/40 bg-cyber-purple/10 text-cyber-purple text-[10px] font-mono uppercase tracking-[0.3em] mb-12 shadow-[0_0_30px_rgba(188,0,255,0.15)] backdrop-blur-sm">
+          {/* Content Wrapper with glass backdrop for text legibility */}
+          <div className="relative z-10 p-8 md:p-16 rounded-3xl max-w-5xl glass-card backdrop-blur-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border border-cyber-purple/40 bg-cyber-purple/10 text-cyber-purple text-[10px] font-mono uppercase tracking-[0.3em] mb-12 shadow-[0_0_30px_rgba(188,0,255,0.15)]">
               <Activity className="w-3 h-3" />
               <span>Autonomous Infrastructure Synthesis</span>
             </div>
