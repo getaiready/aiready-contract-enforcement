@@ -41,7 +41,7 @@ export default function PlatformShell({
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { href: '/dashboard', label: 'Dashboard', icon: RocketIcon },
+    { href: '/dashboard', label: 'Platform', icon: RocketIcon },
     { href: '/strategy', label: 'Scan Strategy', icon: SettingsIcon },
     { href: '/trends', label: 'Trends Explorer', icon: TrendingUpIcon },
     { href: '/map', label: 'Codebase Map', icon: RobotIcon },

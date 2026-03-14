@@ -123,9 +123,13 @@ clawmore-verify: ## Verify ClawMore is accessible
 		echo "$(YELLOW)⚠️  ClawMore may still be deploying$(NC)"; \
 	fi
 
-dev-clawmore: ## Run ClawMore locally in development mode
-	@$(call log_step,Starting ClawMore local dev server)
-	@cd clawmore && pnpm dev
+dev-clawmore: ## Run ClawMore locally in development mode (SST dev --stage local)
+	@$(call log_step,Starting ClawMore dev server with SST...)
+	@echo "$(CYAN)Using AWS profile: $(GREEN)aiready$(NC)"
+	@echo "$(CYAN)ClawMore will be available at: $(GREEN)http://localhost:8886$(NC)"
+	@cd clawmore && \
+		[ -f .env.local ] && set -a && . ./.env.local && set +a || true && \
+		AWS_PROFILE=aiready $(PNPM) dev
 
 clawmore-logs: ## Show ClawMore logs (runs sst dev)
 	@$(call log_step,Starting SST dev mode for ClawMore)

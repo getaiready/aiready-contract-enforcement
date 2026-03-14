@@ -24,7 +24,7 @@ export async function parseRuleFile(
   const lines = content.split('\n');
 
   // Extract frontmatter if present
-  let frontmatter: Record<string, any> = {};
+  const frontmatter: Record<string, any> = {};
   let contentStart = 0;
 
   if (content.startsWith('---')) {

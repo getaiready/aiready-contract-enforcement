@@ -52,7 +52,7 @@ export default function Sidebar({ overallScore }: Props) {
   const pathname = usePathname();
 
   const items = [
-    { href: '/dashboard', label: 'Dashboard', icon: RocketIcon },
+    { href: '/dashboard', label: 'Platform', icon: RocketIcon },
     { href: '/strategy', label: 'Scan Strategy', icon: SettingsIcon },
     { href: '/trends', label: 'Trends Explorer', icon: TrendingUpIcon },
     { href: '/map', label: 'Codebase Map', icon: RobotIcon },

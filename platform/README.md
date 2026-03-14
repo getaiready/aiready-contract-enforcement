@@ -113,12 +113,12 @@ The `sst.config.ts` handles:
 
 ### Database Schema (DynamoDB Single Table)
 
-| Entity   | PK              | SK                     | GSI1            | GSI2            |
-| -------- | --------------- | ---------------------- | --------------- | --------------- |
-| User     | `USER#{id}`     | `USER#{id}`            | `EMAIL#{email}` | -               |
-| Repo     | `USER#{userId}` | `REPO#{repoId}`        | `REPO#{url}`    | -               |
-| Analysis | `REPO#{repoId}` | `ANALYSIS#{timestamp}` | -               | `USER#{userId}` |
-| ApiKey   | `USER#{userId}` | `KEY#{id}`             | `HASH#{keyHash}`| -               |
+| Entity   | PK              | SK                     | GSI1             | GSI2            |
+| -------- | --------------- | ---------------------- | ---------------- | --------------- |
+| User     | `USER#{id}`     | `USER#{id}`            | `EMAIL#{email}`  | -               |
+| Repo     | `USER#{userId}` | `REPO#{repoId}`        | `REPO#{url}`     | -               |
+| Analysis | `REPO#{repoId}` | `ANALYSIS#{timestamp}` | -                | `USER#{userId}` |
+| ApiKey   | `USER#{userId}` | `KEY#{id}`             | `HASH#{keyHash}` | -               |
 
 ### Stripe Integration
 
