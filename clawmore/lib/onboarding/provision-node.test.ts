@@ -2,13 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProvisioningOrchestrator } from './provision-node';
 
 const {
-  mockCreateUsingTemplate,
+  mockCreateFork,
+  mockReposGet,
+  mockReposUpdate,
   mockCreateOrUpdateRepoSecret,
   mockGetRepoPublicKey,
   mockQuery,
   mockUpdate,
 } = vi.hoisted(() => ({
-  mockCreateUsingTemplate: vi.fn(),
+  mockCreateFork: vi.fn(),
+  mockReposGet: vi.fn(),
+  mockReposUpdate: vi.fn(),
   mockCreateOrUpdateRepoSecret: vi.fn(),
   mockGetRepoPublicKey: vi.fn(),
   mockQuery: vi.fn(),
@@ -18,7 +22,11 @@ const {
 // Mock Octokit
 vi.mock('@octokit/rest', () => {
   class MockOctokit {
-    repos = { createUsingTemplate: mockCreateUsingTemplate };
+    repos = {
+      createFork: mockCreateFork,
+      get: mockReposGet,
+      update: mockReposUpdate,
+    };
     actions = {
       createOrUpdateRepoSecret: mockCreateOrUpdateRepoSecret,
       getRepoPublicKey: mockGetRepoPublicKey,
@@ -99,9 +107,13 @@ describe('Provisioning Secret Injection', () => {
   });
 
   it('should inject HUB_USER_ID and HUB_EVENT_BUS_NAME secrets', async () => {
-    mockCreateUsingTemplate.mockResolvedValue({
-      data: { html_url: 'https://github.com/ok' },
+    mockCreateFork.mockResolvedValue({
+      data: { html_url: 'https://github.com/clawmost/test-node' },
     });
+    mockReposGet.mockResolvedValue({
+      data: { full_name: 'clawmost/test-node' },
+    });
+    mockReposUpdate.mockResolvedValue({});
     mockGetRepoPublicKey.mockResolvedValue({
       data: { key: 'key_abc', key_id: 'kid_123' },
     });

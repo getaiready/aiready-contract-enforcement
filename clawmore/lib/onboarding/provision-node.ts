@@ -85,15 +85,27 @@ export class ProvisioningOrchestrator {
       await attachSCPToAccount(scpId, accountId);
       const bootstrapRoleArn = await bootstrapManagedAccount(accountId);
 
-      // 3. GitHub Provisioning (Targeting 'clawmost' org)
+      // 3. GitHub Provisioning — Fork from serverlessclaw into 'clawmost' org
       console.log(
-        `[Provision] Provisioning private repo ${githubOrg}/${repoName}...`
+        `[Provision] Forking serverlessclaw into ${githubOrg}/${repoName}...`
       );
-      const repoResponse = await this.octokit.repos.createUsingTemplate({
-        template_owner: 'caopengau',
-        template_repo: 'serverlessclaw',
-        owner: githubOrg,
+      const forkResponse = await this.octokit.repos.createFork({
+        owner: 'caopengau',
+        repo: 'serverlessclaw',
+        organization: githubOrg,
         name: repoName,
+      });
+
+      // Wait for fork to be ready (GitHub forks are async)
+      console.log(`[Provision] Waiting for fork to be ready...`);
+      const repoUrl = forkResponse.data.html_url;
+      await this.waitForRepoReady(githubOrg, repoName);
+
+      // Make fork private
+      console.log(`[Provision] Making fork private...`);
+      await this.octokit.repos.update({
+        owner: githubOrg,
+        repo: repoName,
         private: true,
       });
 
@@ -190,19 +202,14 @@ export class ProvisioningOrchestrator {
       await ensureUserMetadata(userEmail);
 
       // Mark provisioning as complete
-      await updateProvisioningStatus(
-        accountId,
-        'complete',
-        undefined,
-        repoResponse.data.html_url
-      );
+      await updateProvisioningStatus(accountId, 'complete', undefined, repoUrl);
 
       console.log(
         `[Provision] Node successfully vended under ${githubOrg} org!`
       );
       return {
         accountId,
-        repoUrl: repoResponse.data.html_url,
+        repoUrl,
         roleArn: bootstrapRoleArn,
         org: githubOrg,
       };
@@ -238,6 +245,35 @@ export class ProvisioningOrchestrator {
       encrypted_value: encryptedValue,
       key_id: publicKey.key_id,
     });
+  }
+
+  /**
+   * Polls until the forked repo is available.
+   * GitHub forks are async and may take a few seconds.
+   */
+  private async waitForRepoReady(
+    owner: string,
+    repo: string,
+    maxRetries = 30,
+    delayMs = 2000
+  ): Promise<void> {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        await this.octokit.repos.get({ owner, repo });
+        console.log(`[Provision] Repo ${owner}/${repo} is ready.`);
+        return;
+      } catch {
+        if (i < maxRetries - 1) {
+          console.log(
+            `[Provision] Repo not ready yet, retrying in ${delayMs}ms... (${i + 1}/${maxRetries})`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+    throw new Error(
+      `Fork ${owner}/${repo} did not become available after ${maxRetries} retries`
+    );
   }
 
   private async encryptSecret(
