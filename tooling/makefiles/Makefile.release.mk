@@ -385,10 +385,10 @@ update-homebrew: ## Update Homebrew formula to latest CLI version
 	fi; \
 	$(call log_info,SHA256: $$sha256)
 	@$(call log_step,Updating Homebrew formula...)
-	@sed -i '' "s|url \".*\"|url \"https://registry.npmjs.org/@aiready/cli/-/cli-$$latest_cli.tgz\"|g" homebrew/aiready.rb; \
-	sed -i '' "s|sha256 \".*\"|sha256 \"$$sha256\"|g" homebrew/aiready.rb
+	@sed -i '' "s|url \".*\"|url \"https://registry.npmjs.org/@aiready/cli/-/cli-$$latest_cli.tgz\"|g" tooling/homebrew/aiready.rb; \
+	sed -i '' "s|sha256 \".*\"|sha256 \"$$sha256\"|g" tooling/homebrew/aiready.rb
 	@$(call log_step,Committing Homebrew formula update...)
-	@git add homebrew/aiready.rb && \
+	@git add tooling/homebrew/aiready.rb && \
 		git commit -m "chore: update Homebrew formula to v$$latest_cli" || true
 	@$(call log_success,Homebrew formula updated)
 
