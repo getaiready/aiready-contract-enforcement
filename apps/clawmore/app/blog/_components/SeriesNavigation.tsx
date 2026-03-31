@@ -88,10 +88,10 @@ export default function SeriesNavigation({
         ) : (
           <div className="flex-1 p-6 rounded-3xl border border-white/[0.02] flex flex-col items-start gap-2 opacity-20 grayscale cursor-not-allowed">
             <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              Beginning of Story
+              <span>Beginning of Story</span>
             </div>
             <div className="text-sm font-black italic text-white uppercase tracking-tight">
-              No Previous Content
+              <span>No Previous Content</span>
             </div>
           </div>
         )}
