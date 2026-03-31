@@ -17,7 +17,7 @@ import {
 /**
  * Constants for file classifications to avoid magic strings
  */
-export const Classification = {
+export const CLASSIFICATION = {
   BARREL: 'barrel-export' as const,
   BOILERPLATE: 'boilerplate-barrel' as const,
   TYPE_DEFINITION: 'type-definition' as const,
@@ -48,81 +48,81 @@ export function classifyFile(
 ): FileClassification {
   // 1. Detect boilerplate barrels (pure indirection/architectural theater)
   if (isBoilerplateBarrel(node)) {
-    return Classification.BOILERPLATE;
+    return CLASSIFICATION.BOILERPLATE;
   }
 
   // 2. Detect legitimate barrel exports (primarily re-exports that aggregate)
   if (isBarrelExport(node)) {
-    return Classification.BARREL;
+    return CLASSIFICATION.BARREL;
   }
 
   // 2. Detect type definition files
   if (isTypeDefinition(node)) {
-    return Classification.TYPE_DEFINITION;
+    return CLASSIFICATION.TYPE_DEFINITION;
   }
 
   // 3. Detect Next.js App Router pages
   if (isNextJsPage(node)) {
-    return Classification.NEXTJS_PAGE;
+    return CLASSIFICATION.NEXTJS_PAGE;
   }
 
   // 4. Detect Lambda handlers
   if (isLambdaHandler(node)) {
-    return Classification.LAMBDA_HANDLER;
+    return CLASSIFICATION.LAMBDA_HANDLER;
   }
 
   // 5. Detect Service files
   if (isServiceFile(node)) {
-    return Classification.SERVICE;
+    return CLASSIFICATION.SERVICE;
   }
 
   // 6. Detect Email templates
   if (isEmailTemplate(node)) {
-    return Classification.EMAIL_TEMPLATE;
+    return CLASSIFICATION.EMAIL_TEMPLATE;
   }
 
   // 7. Detect Parser/Transformer files
   if (isParserFile(node)) {
-    return Classification.PARSER;
+    return CLASSIFICATION.PARSER;
   }
 
   // 8. Detect Session/State management files
   if (isSessionFile(node)) {
     // If it has high cohesion, it's a cohesive module
     if (cohesionScore >= 0.25 && domains.length <= 1)
-      return Classification.COHESIVE_MODULE;
-    return Classification.UTILITY_MODULE; // Group with utility for now
+      return CLASSIFICATION.COHESIVE_MODULE;
+    return CLASSIFICATION.UTILITY_MODULE; // Group with utility for now
   }
 
   // 9. Detect Utility modules (multi-domain but functional purpose)
   if (isUtilityModule(node)) {
-    return Classification.UTILITY_MODULE;
+    return CLASSIFICATION.UTILITY_MODULE;
   }
 
   // 10. Detect Config/Schema files
   if (isConfigFile(node)) {
-    return Classification.COHESIVE_MODULE;
+    return CLASSIFICATION.COHESIVE_MODULE;
   }
 
   // 11. Detect Spoke modules in monorepo
   if (isHubAndSpokeFile(node)) {
-    return Classification.SPOKE_MODULE;
+    return CLASSIFICATION.SPOKE_MODULE;
   }
 
   // Cohesion and Domain heuristics
   if (domains.length <= 1 && domains[0] !== 'unknown') {
-    return Classification.COHESIVE_MODULE;
+    return CLASSIFICATION.COHESIVE_MODULE;
   }
 
   if (domains.length > 1 && cohesionScore < 0.4) {
-    return Classification.MIXED_CONCERNS;
+    return CLASSIFICATION.MIXED_CONCERNS;
   }
 
   if (cohesionScore >= 0.7) {
-    return Classification.COHESIVE_MODULE;
+    return CLASSIFICATION.COHESIVE_MODULE;
   }
 
-  return Classification.UNKNOWN;
+  return CLASSIFICATION.UNKNOWN;
 }
 
 // [Split Point] Logic below this point handled by heuristics.ts
@@ -141,15 +141,15 @@ export function adjustCohesionForClassification(
   node?: DependencyNode
 ): number {
   switch (classification) {
-    case Classification.BOILERPLATE:
+    case CLASSIFICATION.BOILERPLATE:
       return 0.2; // Redundant indirection is low cohesion (architectural theater)
-    case Classification.BARREL:
+    case CLASSIFICATION.BARREL:
       return 1;
-    case Classification.TYPE_DEFINITION:
+    case CLASSIFICATION.TYPE_DEFINITION:
       return 1;
-    case Classification.NEXTJS_PAGE:
+    case CLASSIFICATION.NEXTJS_PAGE:
       return 1;
-    case Classification.UTILITY_MODULE: {
+    case CLASSIFICATION.UTILITY_MODULE: {
       if (
         node &&
         hasRelatedExportNames(
@@ -160,19 +160,19 @@ export function adjustCohesionForClassification(
       }
       return Math.max(0.75, Math.min(1, baseCohesion + 0.35));
     }
-    case Classification.SERVICE:
+    case CLASSIFICATION.SERVICE:
       return Math.max(0.72, Math.min(1, baseCohesion + 0.3));
-    case Classification.LAMBDA_HANDLER:
+    case CLASSIFICATION.LAMBDA_HANDLER:
       return Math.max(0.75, Math.min(1, baseCohesion + 0.35));
-    case Classification.EMAIL_TEMPLATE:
+    case CLASSIFICATION.EMAIL_TEMPLATE:
       return Math.max(0.72, Math.min(1, baseCohesion + 0.3));
-    case Classification.PARSER:
+    case CLASSIFICATION.PARSER:
       return Math.max(0.7, Math.min(1, baseCohesion + 0.3));
-    case Classification.SPOKE_MODULE:
+    case CLASSIFICATION.SPOKE_MODULE:
       return Math.max(baseCohesion, 0.6);
-    case Classification.COHESIVE_MODULE:
+    case CLASSIFICATION.COHESIVE_MODULE:
       return Math.max(baseCohesion, 0.7);
-    case Classification.MIXED_CONCERNS:
+    case CLASSIFICATION.MIXED_CONCERNS:
       return baseCohesion;
     default:
       return Math.min(1, baseCohesion + 0.1);
@@ -244,24 +244,24 @@ export function adjustFragmentationForClassification(
   classification: FileClassification
 ): number {
   switch (classification) {
-    case Classification.BOILERPLATE:
+    case CLASSIFICATION.BOILERPLATE:
       return baseFragmentation * 1.5; // Redundant barrels increase fragmentation
-    case Classification.BARREL:
+    case CLASSIFICATION.BARREL:
       return 0;
-    case Classification.TYPE_DEFINITION:
+    case CLASSIFICATION.TYPE_DEFINITION:
       return 0;
-    case Classification.UTILITY_MODULE:
-    case Classification.SERVICE:
-    case Classification.LAMBDA_HANDLER:
-    case Classification.EMAIL_TEMPLATE:
-    case Classification.PARSER:
-    case Classification.NEXTJS_PAGE:
+    case CLASSIFICATION.UTILITY_MODULE:
+    case CLASSIFICATION.SERVICE:
+    case CLASSIFICATION.LAMBDA_HANDLER:
+    case CLASSIFICATION.EMAIL_TEMPLATE:
+    case CLASSIFICATION.PARSER:
+    case CLASSIFICATION.NEXTJS_PAGE:
       return baseFragmentation * 0.2;
-    case Classification.SPOKE_MODULE:
+    case CLASSIFICATION.SPOKE_MODULE:
       return baseFragmentation * 0.15; // Heavily discount intentional monorepo separation
-    case Classification.COHESIVE_MODULE:
+    case CLASSIFICATION.COHESIVE_MODULE:
       return baseFragmentation * 0.3;
-    case Classification.MIXED_CONCERNS:
+    case CLASSIFICATION.MIXED_CONCERNS:
       return baseFragmentation;
     default:
       return baseFragmentation * 0.7;

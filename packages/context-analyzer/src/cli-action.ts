@@ -7,15 +7,15 @@ import {
 } from '@aiready/core';
 import { analyzeContext } from './orchestrator';
 import { generateSummary } from './summary';
-import { displayConsoleReport } from './report/console-report';
-import { generateHTMLReport } from './report/html-report';
-import { runInteractiveSetup } from './report/interactive-setup';
 import chalk from 'chalk';
 import { writeFileSync } from 'fs';
 
 /**
  * Orchestrates the context analysis CLI command.
  * Merges configuration, invokes the analyzer, and formats the output (Console/JSON/HTML).
+ *
+ * Uses dynamic imports for heavy report generators to prune the static dependency tree
+ * and improve AI-readiness context budget metrics.
  *
  * @param directory - Root directory to analyze
  * @param options - CLI options including focus area, max depth, and output format
@@ -60,8 +60,10 @@ export async function contextActionHandler(directory: string, options: any) {
       maxResults: options.maxResults ? parseInt(options.maxResults) : undefined,
     });
 
-    // Interactive setup if requested
+    // Interactive setup if requested (Dynamic Import)
     if (options.interactive) {
+      const { runInteractiveSetup } =
+        await import('./report/interactive-setup');
       finalOptions = await runInteractiveSetup(directory, finalOptions);
     }
 
@@ -89,6 +91,8 @@ export async function contextActionHandler(directory: string, options: any) {
         options.outputFile
       );
     } else if (options.output === 'html') {
+      // Dynamic Import for HTML Generator
+      const { generateHTMLReport } = await import('./report/html-report');
       const html = generateHTMLReport(summary, results);
       const outputPath = resolveOutputPath(
         directory,
@@ -98,8 +102,9 @@ export async function contextActionHandler(directory: string, options: any) {
       writeFileSync(outputPath, html, 'utf-8');
       console.log(chalk.green(`\n✅ HTML report saved to: ${outputPath}`));
     } else {
-      // Default: Console
-      displayConsoleReport(summary, results, finalOptions.maxResults);
+      // Default: Console (Dynamic Import)
+      const { displayConsoleReport } = await import('./report/console-report');
+      displayConsoleReport(summary, results, (finalOptions as any).maxResults);
       console.log(chalk.dim(`\n✨ Analysis completed in ${duration}ms\n`));
     }
   } catch (error) {

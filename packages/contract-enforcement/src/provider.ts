@@ -7,7 +7,7 @@ import type {
   ContractEnforcementReport,
 } from './types';
 
-export const ContractEnforcementProvider = createProvider({
+export const CONTRACT_ENFORCEMENT_PROVIDER = createProvider({
   id: ToolName.ContractEnforcement,
   alias: ['contract', 'ce', 'enforcement'],
   version: '0.1.0',

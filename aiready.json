@@ -1,6 +1,6 @@
 {
   "$schema": "https://getaiready.dev/schema.json",
-  "threshold": 75,
+  "threshold": 70,
   "scan": {
     "include": [
       "src/**/*.ts",

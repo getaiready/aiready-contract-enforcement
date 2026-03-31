@@ -19,7 +19,7 @@ import type {
 /**
  * Context Analyzer Tool Provider
  */
-export const ContextAnalyzerProvider: ToolProvider = {
+export const CONTEXT_ANALYZER_PROVIDER: ToolProvider = {
   id: ToolName.ContextAnalyzer,
   alias: ['context', 'fragmentation', 'budget'],
 
