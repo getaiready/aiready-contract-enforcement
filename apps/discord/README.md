@@ -238,5 +238,5 @@ After running the invite script, you'll get snippets for:
 For issues with the Discord server setup:
 
 - Check the [AIReady Documentation](https://getaiready.dev/docs)
-- Join the [AIReady Discord](https://discord.gg/invite-code)
-- Open an issue on [GitHub](https://github.com/caopengau/aiready/issues)
+- Join the [AIReady Discord](https://discord.gg/GdEghUdWHS)
+- Open an issue on [GitHub](https://github.com/getaiready/aiready-cli/issues)

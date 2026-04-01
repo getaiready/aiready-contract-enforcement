@@ -74,7 +74,7 @@ export function createWelcomeEmbed(): EmbedBuilder {
       {
         name: '📚 Resources',
         value:
-          '• [Website](https://getaiready.dev)\n• [GitHub](https://github.com/caopengau/aiready)\n• [Documentation](https://getaiready.dev/docs)',
+          '• [Website](https://getaiready.dev)\n• [GitHub](https://github.com/getaiready/aiready-cli)\n• [Documentation](https://getaiready.dev/docs)',
       },
       {
         name: '💬 Need Help?',
@@ -100,7 +100,7 @@ export function createWelcomeButtons(): ActionRowBuilder<ButtonBuilder> {
     new ButtonBuilder()
       .setLabel('GitHub')
       .setStyle(ButtonStyle.Link)
-      .setURL('https://github.com/caopengau/aiready'),
+      .setURL('https://github.com/getaiready/aiready-cli'),
     new ButtonBuilder()
       .setLabel('Documentation')
       .setStyle(ButtonStyle.Link)

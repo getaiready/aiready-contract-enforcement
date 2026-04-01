@@ -188,7 +188,7 @@ async function setupDiscordServer() {
                 {
                   name: '📚 Resources',
                   value:
-                    '• [Website](https://getaiready.dev)\n• [GitHub](https://github.com/caopengau/aiready)\n• [Documentation](https://getaiready.dev/docs)',
+                    '• [Website](https://getaiready.dev)\n• [GitHub](https://github.com/getaiready/aiready-cli)\n• [Documentation](https://getaiready.dev/docs)',
                 },
                 {
                   name: '💬 Need Help?',

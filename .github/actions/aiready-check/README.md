@@ -1,7 +1,7 @@
 # AIReady GitHub Action
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-AIReady%20Check-blue?logo=github)](https://github.com/marketplace/actions/aiready-check)
-[![Version](https://img.shields.io/github/v/release/caopengau/aiready-action?include_prereleases)](https://github.com/caopengau/aiready-action/releases)
+[![Version](https://img.shields.io/github/v/release/getaiready/aiready-action?include_prereleases)](https://github.com/getaiready/aiready-action/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node 24](https://img.shields.io/badge/Node.js-24+-green?logo=node.js)](https://nodejs.org/)
 
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: AI Readiness Check
-        uses: caopengau/aiready-action@v1
+        uses: getaiready/aiready-action@v1
         with:
           threshold: 70
           fail-on: critical
@@ -181,8 +181,8 @@ Visit [getaiready.dev/pricing](https://getaiready.dev/pricing) for more details.
 ## Links
 
 - 📚 [Documentation](https://getaiready.dev/docs)
-- 🐛 [Report Bug](https://github.com/caopengau/aiready/issues)
-- 💡 [Request Feature](https://github.com/caopengau/aiready/issues)
+- 🐛 [Report Bug](https://github.com/getaiready/aiready-cli/issues)
+- 💡 [Request Feature](https://github.com/getaiready/aiready-cli/issues)
 - 📦 [npm Package](https://www.npmjs.com/package/@aiready/cli)
 
 ## License

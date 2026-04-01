@@ -181,7 +181,7 @@ Now that your server is public, share it:
    - Replace placeholder Discord ID and invite code
    - Example:
      ```markdown
-     [![Discord](https://img.shields.io/discord/123456789?label=Discord&logo=discord)](https://discord.gg/your-invite-code)
+     [![Discord](https://img.shields.io/discord/123456789?label=Discord&logo=discord)](https://discord.gg/GdEghUdWHS)
      ```
 
 2. **Update Landing Page**
@@ -285,5 +285,5 @@ Monitor your server growth:
 If you need help with Discord server setup:
 
 - Check the [AIReady Discord README](../README.md)
-- Join the [AIReady Discord](https://discord.gg/invite-code)
-- Open an issue on [GitHub](https://github.com/caopengau/aiready/issues)
+- Join the [AIReady Discord](https://discord.gg/GdEghUdWHS)
+- Open an issue on [GitHub](https://github.com/getaiready/aiready-cli/issues)

@@ -4,9 +4,9 @@ AIReady is a comprehensive toolkit designed to assess and optimize codebases for
 
 ## 🤝 Community & Support
 
-[![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?label=Discord&logo=discord)](https://discord.gg/invite-code)
+[![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?label=Discord&logo=discord)](https://discord.gg/GdEghUdWHS)
 
-Join our [Discord community](https://discord.gg/invite-code) to:
+Join our [Discord community](https://discord.gg/GdEghUdWHS) to:
 
 - Get help with AIReady tools
 - Share your AI readiness improvements
