@@ -178,9 +178,22 @@ endif
 
 # PNPM and Turbo configuration
 PNPM ?= $(shell command -v pnpm || echo pnpm)
-TURBO := $(PNPM) turbo
+TURBO_BIN := $(ROOT_DIR)/node_modules/.bin/turbo
+TURBO := $(if $(wildcard $(TURBO_BIN)),$(TURBO_BIN),turbo)
+
 SILENT_PNPM ?= --silent
 SILENT_TURBO ?= --output-logs=errors-only
+
+# Standard macro for running turbo tasks
+# Usage: $(call turbo_run,task,filter,label)
+define turbo_run
+	$(call log_step,$(or $(3),Running $(1) $(if $(2),for $(2))...))
+	unset npm_config_loglevel; \
+	$(TURBO) run $(1) $(if $(2),--filter=$(2)) $(SILENT_TURBO) || { \
+		$(call log_error,$(or $(3),$(1)) failed); \
+		exit 1; \
+	}
+endef
 
 # Purpose: Time the execution of a target command
 # Usage: $(call track_time,command,label)

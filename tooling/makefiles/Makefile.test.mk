@@ -12,64 +12,34 @@ include $(MAKEFILE_DIR)/Makefile.shared.mk
 	mcp-test-server mcp-test-ast
 
 test: ## Run tests for all packages (noninteractive)
-	@$(call log_step,Running tests for all packages (noninteractive)...) 
-	@if command -v turbo >/dev/null 2>&1; then \
-		unset npm_config_loglevel; \
-		CI=1 turbo run test test-contract $(SILENT_TURBO); \
-	else \
-		CI=1 $(PNPM) --no-interactive $(SILENT_PNPM) test; \
-	fi
+	@CI=1 $(call turbo_run,test test-contract,,Running all tests...)
 	@$(call log_success,All tests passed)
 
 test-core: ## Run tests for core package only
-	@$(call log_info,Running tests for @aiready/core...)
-	@$(PNPM) --filter @aiready/core test
-	@$(call log_success,Core tests passed)
+	@$(call turbo_run,test,@aiready/core,Running core tests)
 
 test-pattern-detect: ## Run tests for pattern-detect package only
-	@$(call log_info,Running tests for @aiready/pattern-detect...)
-	@$(PNPM) --filter @aiready/pattern-detect test
-	@$(call log_success,Pattern-detect tests passed)
+	@$(call turbo_run,test,@aiready/pattern-detect,Running pattern-detect tests)
 
 test-watch: ## Run tests in watch mode
 	@$(call log_info,Running tests in watch mode...)
 	@$(PNPM) test --watch
 
 test-coverage: ## Run tests with coverage report
-	@$(call log_step,Running tests with coverage...)
-	@for pkg in packages/core packages/pattern-detect packages/context-analyzer packages/consistency packages/visualizer packages/components packages/skills packages/cli; do \
-		if [ -f "$$pkg/package.json" ]; then \
-			$(call log_info,Running coverage for $$pkg...); \
-			cd $$pkg && $(PNPM) test --coverage 2>/dev/null || $(call log_warning,Coverage failed for $$pkg); \
-			cd ../..; \
-		fi; \
-	done
+	@$(call turbo_run,test:coverage,,Running tests with coverage...)
 	@$(call log_success,Coverage report generated)
 
 test-landing: ## Run unit tests for landing page
-	@$(call log_info,Running tests for @aiready/landing...)
-	@cd apps/landing && $(PNPM) lint || $(call log_warning,Landing lint had errors - continuing anyway)
-	@$(call log_success,Landing tests checked)
+	@$(call turbo_run,lint,@aiready/landing,Checking landing)
 
 test-platform: ## Run unit tests for platform
-	@$(call log_info,Running tests for @aiready/platform...)
-	@cd apps/platform && $(PNPM) test
-	@$(call log_success,Platform unit tests passed)
+	@$(call turbo_run,test,@aiready/platform,Running platform tests)
 
 test-contract: ## Run Spoke-to-Hub contract tests (Tier 1)
-	@$(call log_step,Running Tier 1 Contract Tests...)
-	@if command -v turbo >/dev/null 2>&1; then \
-		unset npm_config_loglevel; \
-		CI=1 turbo run test:contract $(SILENT_TURBO); \
-	else \
-		$(PNPM) -r exec -- vitest run contract.test.ts --passWithNoTests; \
-	fi
-	@$(call log_success,Tier 1 Contract Tests passed)
+	@CI=1 $(call turbo_run,test:contract,,Running contract tests...)
 
 test-integration: ## Run monorepo integration tests (Tier 2)
-	@$(call log_step,Running Tier 2 Integration Tests...)
-	@$(PNPM) --filter @aiready/integration-tests test
-	@$(call log_success,Tier 2 Integration Tests passed)
+	@$(call turbo_run,test,@aiready/integration-tests,Running integration tests)
 
 test-verify-cli: ## Run a smoke scan and verify CLI output
 	@$(call log_step,Running CLI smoke test...)
@@ -98,19 +68,13 @@ test-platform-e2e-local: ## Run platform E2E tests against local dev server
 	@$(call log_success,Platform local E2E tests passed)
 
 test-visualizer: ## Build and test the visualizer
-	@$(call log_step,Verifying @aiready/visualizer...)
-	@$(PNPM) --filter @aiready/visualizer run typecheck || { $(call log_error,Visualizer typecheck failed); exit 1; }
-	@$(PNPM) --filter @aiready/visualizer build || { $(call log_error,Visualizer build failed); exit 1; }
-	@$(PNPM) --filter @aiready/visualizer test || { $(call log_error,Visualizer tests failed); exit 1; }
-	@$(call log_success,Visualizer verified)
+	@$(call turbo_run,typecheck build test,@aiready/visualizer,Verifying visualizer)
 
 test-vscode-extension: ## Compile the VS Code extension to ensure no breaking changes
-	@$(call log_step,Verifying aiready (VS Code extension)...)
-	@cd apps/vscode-extension && $(PNPM) exec tsc --noEmit && $(PNPM) run compile || { $(call log_error,VS Code extension verification failed); exit 1; }
-	@$(call log_success,VS Code extension verified)
+	@$(call turbo_run,typecheck build test,@aiready/vscode-extension,Verifying VS Code extension)
 
 test-downstream: ## Run all downstream verification tests (platform, visualizer, vscode-extension)
-	@$(call log_step,Running DOWNSTREAM verification (safety check for hubs)...)
+	@$(call log_step,Running DOWNSTREAM verification...)
 	@$(MAKE) $(MAKE_PARALLEL) test-platform test-visualizer test-vscode-extension test-landing
 	@$(call log_success,All downstream services verified)
 

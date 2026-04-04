@@ -19,91 +19,54 @@ TYPE_LEAF := $(foreach spoke,$(QUALITY_SPOKES),type-check-$(spoke))
 
 # Combined quality checks
 check-all: ## Run format-check, lint, and type-check across the repo
-	@$(call log_step,Running all quality checks with Turbo...)
-	@if command -v $(TURBO) >/dev/null 2>&1 || [ -f ./node_modules/.bin/turbo ]; then \
-		unset npm_config_loglevel; \
-		$(TURBO) run lint format-check type-check $(SILENT_TURBO); \
-	else \
-		$(MAKE) $(MAKE_PARALLEL) $(FORMAT_LEAF) $(LINT_LEAF) $(TYPE_LEAF); \
-	fi
+	@$(call turbo_run,lint format-check type-check,,Running all quality checks...)
 	@$(call log_success,All checks passed)
 
 check: check-all ## Alias for check-all
 
 # Combined quality fixes
 fix: ## Run ESLint --fix and Prettier format
-	@$(call log_step,Applying ESLint fixes and formatting...)
-	@$(MAKE) lint-fix
-	@$(MAKE) format
+	@$(call turbo_run,lint:fix format,,Applying all quality fixes...)
 	@$(call log_success,Codebase fixed and formatted)
 
 # Lint targets
 lint: ## Run ESLint on all packages
-	@$(call log_info,Running ESLint on all packages...)
-	@if command -v $(TURBO) >/dev/null 2>&1 || [ -f ./node_modules/.bin/turbo ]; then \
-		unset npm_config_loglevel; \
-		$(TURBO) run lint $(SILENT_TURBO); \
-	else \
-		$(MAKE) $(MAKE_PARALLEL) $(LINT_LEAF); \
-	fi
+	@$(call turbo_run,lint,,Running ESLint on all packages...)
 	@$(call log_success,All lint checks passed.)
 
 lint-%:
-	@$(call log_info,Linting $* (ESLint)...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/$* lint
-	@$(call log_success,$* lint passed)
+	@$(call turbo_run,lint,@aiready/$*,Linting $*)
 
 # Lint fixes
 lint-fix: ## Run ESLint --fix on all packages
-	@$(call log_info,Auto-fixing lint issues on all packages...)
-	@$(MAKE) $(MAKE_PARALLEL) $(LINT_FIX_LEAF)
+	@$(call turbo_run,lint:fix,,Auto-fixing lint issues on all packages...)
 	@$(call log_success,All lint fixes completed)
 
 lint-fix-%:
-	@$(call log_info,Auto-fixing lint issues ($*)...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/$* lint --fix
-	@$(call log_success,$* ESLint auto-fix completed)
+	@$(call turbo_run,lint:fix,@aiready/$*,Auto-fixing lint issues ($*))
 
 # Format checks
 format-check: ## Check formatting across all packages
-	@$(call log_step,Checking formatting with Prettier (Turbo)...)
-	@if command -v $(TURBO) >/dev/null 2>&1 || [ -f ./node_modules/.bin/turbo ]; then \
-		unset npm_config_loglevel; \
-		$(TURBO) run format-check $(SILENT_TURBO); \
-	else \
-		$(MAKE) $(MAKE_PARALLEL) $(FORMAT_LEAF); \
-	fi
+	@$(call turbo_run,format-check,,Checking formatting with Prettier...)
 	@$(call log_success,Formatting checks passed)
 
 format-check-%:
-	@$(call log_info,Checking formatting $*...)
-	@$(PNPM) $(SILENT_PNPM) exec prettier --check ./$(call SPOKE_DIR,$*) --ignore-path ./.prettierignore || { $(call log_error,$* formatting issues); exit 1; }
+	@$(call turbo_run,format-check,@aiready/$*,Checking formatting $*)
 
 # Format fixes
 format: ## Format all packages with Prettier
-	@$(call log_step,Formatting code with Prettier...)
-	@$(MAKE) $(MAKE_PARALLEL) $(FORMAT_FIX_LEAF)
+	@$(call turbo_run,format,,Formatting code with Prettier...)
 	@$(call log_success,All packages formatted)
 
 format-%:
-	@$(call log_info,Formatting $*...)
-	@$(PNPM) $(SILENT_PNPM) exec prettier --write ./$(call SPOKE_DIR,$*) --ignore-path ./.prettierignore
-	@$(call log_success,$* formatted)
+	@$(call turbo_run,format,@aiready/$*,Formatting $*)
 
 # Type checking
 type-check: ## Run TypeScript type-check on all packages
-	@$(call log_step,Type-checking all packages (Turbo)...)
-	@if command -v $(TURBO) >/dev/null 2>&1 || [ -f ./node_modules/.bin/turbo ]; then \
-		unset npm_config_loglevel; \
-		$(TURBO) run type-check $(SILENT_TURBO); \
-	else \
-		$(MAKE) $(MAKE_PARALLEL) $(TYPE_LEAF); \
-	fi
+	@$(call turbo_run,type-check,,Type-checking all packages...)
 	@$(call log_success,All type checks passed)
 
 type-check-%:
-	@$(call log_info,Type-checking $*...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/$* exec tsc --noEmit
-	@$(call log_success,$* type-check passed)
+	@$(call turbo_run,type-check,@aiready/$*,Type-checking $*)
 
 type-check-all: type-check ## Alias for type-check

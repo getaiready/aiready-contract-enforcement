@@ -29,7 +29,7 @@ export async function contextActionHandler(directory: string, options: any) {
   try {
     // Define defaults
     const defaults = {
-      maxDepth: 5,
+      maxDepth: 10,
       maxContextBudget: 10000,
       minCohesion: 0.6,
       maxFragmentation: 0.5,

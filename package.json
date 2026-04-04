@@ -24,9 +24,9 @@
   ],
   "scripts": {
     "prebuild": "make clean-cache",
-    "build": "./tooling/scripts/build.sh build",
-    "test": "./tooling/scripts/build.sh test",
-    "lint": "./tooling/scripts/build.sh lint",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
     "dev": "turbo run dev --filter=!@aiready/platform --filter=!@aiready/serverlessclaw --concurrency 11",
     "clean": "turbo run clean && rm -rf node_modules",
     "consume-reports": "node ./tooling/scripts/consume-aiready-reports.js",

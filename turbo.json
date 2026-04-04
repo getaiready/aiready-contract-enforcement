@@ -32,17 +32,30 @@
       "outputs": ["coverage/**"],
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
-    "lint": {
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "test:contract": {
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "type-check": {
+    "test:integration": {
       "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": []
+    },
+    "type-check": {
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^build"],
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
       "outputs": []
     },
@@ -50,10 +63,32 @@
       "inputs": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "src/**/*.css",
-        "src/**/*.json"
+        "**/*.css",
+        "**/*.json",
+        "**/*.md"
       ],
       "outputs": []
+    },
+    "format": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "**/*.css",
+        "**/*.json",
+        "**/*.md"
+      ],
+      "outputs": []
+    },
+    "deploy:dev": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "deploy:prod": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "deploy:remove": {
+      "cache": false
     },
     "dev": {
       "cache": false,

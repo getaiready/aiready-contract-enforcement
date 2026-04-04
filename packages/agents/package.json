@@ -19,7 +19,9 @@
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
-    "format-check": "prettier --check . --ignore-path ../../.prettierignore"
+    "format-check": "prettier --check . --ignore-path ../../.prettierignore",
+    "format": "prettier --write . --ignore-path ../../.prettierignore",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.0",

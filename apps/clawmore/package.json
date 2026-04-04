@@ -10,8 +10,13 @@
     "start": "next start",
     "lint": "eslint",
     "warm-pool": "npx tsx scripts/warm-account-pool.ts",
+    "deploy:dev": "sst deploy --stage dev --yes",
+    "deploy:prod": "sst deploy --stage production --yes",
+    "deploy:remove": "sst remove --stage dev --yes",
     "type-check": "tsc --noEmit",
-    "format-check": "prettier --check . --ignore-path ../../.prettierignore"
+    "format-check": "prettier --check . --ignore-path ../../.prettierignore",
+    "format": "prettier --write . --ignore-path ../../.prettierignore",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@aiready/core": "workspace:*",

@@ -120,12 +120,10 @@ define deploy_sst_app
 	@$(call log_step,Deploying $(2) to AWS (stage: $(or $(3),dev)))
 	@echo "$(CYAN)Using AWS Profile: $(AWS_PROFILE)$(NC)"
 	@echo "$(CYAN)Using AWS Region: $(AWS_REGION)$(NC)"
-	@cd $(1) && \
-		set -a && [ -f .env ] && . ./.env || true && \
-		[ -f .env.$(3) ] && . ./.env.$(3) || true && set +a && \
-		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
-		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
-		$(if $(4),export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" &&) \
-		sst deploy $(if $(3),--stage $(3)) --yes
+	@export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
+	 export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
+	 $(if $(4),export CLOUDFLARE_API_TOKEN="$${CLOUDFLARE_API_TOKEN}" && export CLOUDFLARE_ACCOUNT_ID="$${CLOUDFLARE_ACCOUNT_ID}" &&) \
+	 unset npm_config_loglevel; \
+	 $(TURBO) run deploy:$(if $(filter production prod,$(3)),prod,dev) --filter=@aiready/$(2) $(SILENT_TURBO)
 	@$(call log_success,$(2) deployed$(if $(3), to stage: $(3)))
 endef

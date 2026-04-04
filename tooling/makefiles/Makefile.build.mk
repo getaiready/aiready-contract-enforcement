@@ -6,51 +6,32 @@ include tooling/makefiles/Makefile.shared.mk
 .PHONY: build build-core build-pattern-detect build-skills dev dev-core dev-pattern-detect dev-skills dev-landing dev-platform graph
 
 build: ## Build all packages
-	@$(call log_step,Building all packages...)
-	@if command -v $(TURBO) >/dev/null 2>&1 || [ -f ./node_modules/.bin/turbo ]; then \
-		unset npm_config_loglevel; \
-		$(TURBO) run build $(SILENT_TURBO); \
-	else \
-		$(PNPM) run build $(SILENT_PNPM); \
-	fi
+	@$(call turbo_run,build,,Building all packages...)
 	@$(call log_success,All packages built successfully)
 
 build-skills: ## Build skills package (compiles AGENTS.md from rules)
-	@$(call log_info,Building @aiready/skills...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/skills build
-	@$(call log_success,Skills package built)
+	@$(call turbo_run,build,@aiready/skills,Building skills)
 
 build-core: ## Build core package only
-	@$(call log_info,Building @aiready/core...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/core build
-	@$(call log_success,Core package built)
+	@$(call turbo_run,build,@aiready/core,Building core)
 
 build-pattern-detect: ## Build pattern-detect package only
-	@$(call log_info,Building @aiready/pattern-detect...)
-	@$(PNPM) $(SILENT_PNPM) --filter @aiready/pattern-detect build
-	@$(call log_success,Pattern-detect package built)
+	@$(call turbo_run,build,@aiready/pattern-detect,Building pattern-detect)
 
-dev: ## Start development mode (watch) for all packages (excludes platform — use make dev-platform separately)
+dev: ## Start development mode (watch) for all packages (excludes platform)
 	@$(call log_step,Starting development mode with watch...)
 	@echo "$(CYAN)💡 To start the platform, run: $(GREEN)make dev-platform$(NC)"
-	@if command -v turbo >/dev/null 2>&1; then \
-		turbo run dev --filter=!@aiready/platform; \
-	else \
-		$(PNPM) run dev; \
-	fi
+	@unset npm_config_loglevel; \
+	$(TURBO) run dev --filter=!@aiready/platform --filter=!@aiready/serverlessclaw $(SILENT_TURBO)
 
 dev-core: ## Start development mode (watch) for core package
-	@$(call log_info,Starting development mode for @aiready/core...)
-	@$(PNPM) --filter @aiready/core dev
+	@$(call turbo_run,dev,@aiready/core,Starting dev for core)
 
 dev-pattern-detect: ## Start development mode (watch) for pattern-detect package
-	@$(call log_info,Starting development mode for @aiready/pattern-detect...)
-	@$(PNPM) --filter @aiready/pattern-detect dev
+	@$(call turbo_run,dev,@aiready/pattern-detect,Starting dev for pattern-detect)
 
 dev-skills: ## Build and validate skills rules
-	@$(call log_info,Building and validating skills...)
-	@$(PNPM) --filter @aiready/skills dev
-	@$(call log_success,Skills validated)
+	@$(call turbo_run,dev,@aiready/skills,Validating skills)
 
 landing: dev-landing ## Alias for dev-landing
 dev-landing: ## Start landing page dev server at http://localhost:8887

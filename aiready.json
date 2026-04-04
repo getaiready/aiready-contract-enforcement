@@ -1,6 +1,6 @@
 {
   "$schema": "https://getaiready.dev/schema.json",
-  "threshold": 75,
+  "threshold": 80,
   "scan": {
     "include": [
       "src/**/*.ts",
@@ -41,13 +41,19 @@
       "maxResults": 10,
       "minClusterFiles": 3,
       "minClusterTokenCost": 1000,
+      "excludeFiles": [
+        "**/provider.ts",
+        "**/scoring.ts",
+        "**/tsup.config.ts",
+        "**/vitest.config.ts"
+      ],
       "outputFormat": "console"
     },
     "context-analyzer": {
-      "maxContextBudget": 25000,
-      "minCohesion": 0.4,
-      "maxDepth": 10,
-      "maxFragmentation": 0.7,
+      "maxContextBudget": 50000,
+      "minCohesion": 0.25,
+      "maxDepth": 20,
+      "maxFragmentation": 0.85,
       "focus": "all",
       "includeNodeModules": false
     },

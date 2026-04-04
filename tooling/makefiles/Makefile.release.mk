@@ -87,15 +87,9 @@ version-spoke-%:
 # Internal parallel helper for tagging
 .PHONY: tag-spoke-%
 tag-spoke-%:
-	@version=$$(node -p "require('$(ROOT_DIR)/packages/$*/package.json').version"); \
-	$(call log_step,Tagging @aiready/$* v$$version...); \
-	cd $(ROOT_DIR) && git tag -f -a "$*-v$$version" -m "Release @aiready/$* v$$version" || true
-
 release-checks-spoke: ## Shared checks for release-one (SPOKE required)
 	$(call require_spoke)
-	@$(call log_step,Running shared release checks for @aiready/$(SPOKE)...)
-	@$(MAKE) -C $(ROOT_DIR) build
-	@$(MAKE) -C $(ROOT_DIR) test-contract SPOKE=$(SPOKE)
+	@$(call turbo_run,build test:contract test,@aiready/$(SPOKE),Running checks for @aiready/$(SPOKE))
 	@$(MAKE) -C $(ROOT_DIR) test-integration
 	@$(MAKE) -C $(ROOT_DIR) test-verify-cli
 	@if [ "$(SPOKE)" = "core" ] || [ "$(SPOKE)" = "cli" ]; then \
@@ -110,11 +104,7 @@ release-checks-spoke: ## Shared checks for release-one (SPOKE required)
 	fi
 
 release-checks-all-spokes: ## Shared checks for release-all
-	@$(call log_step,Phase 1: Build...)
-	@$(MAKE) -C $(ROOT_DIR) build
-	@$(call log_step,Phase 2: Parallel tests (unit + contract + integration)...)
-	@$(MAKE) $(MAKE_PARALLEL) test test-contract test-integration
-	@$(call log_step,Phase 3: E2E and Downstream tests...)
+	@$(call turbo_run,build test test:contract test:integration,,Running unified release checks...)
 	@if [ "$(RELEASE_ALL_PLATFORM_E2E)" = "1" ] || [ "$(RELEASE_ALL_DOWNSTREAM)" = "1" ]; then \
 		$(MAKE) $(MAKE_PARALLEL) \
 			$(if $(filter 1,$(RELEASE_ALL_PLATFORM_E2E)),test-platform-e2e-local) \

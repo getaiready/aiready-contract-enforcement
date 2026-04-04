@@ -1,5 +1,9 @@
 import * as Sentry from '@sentry/nextjs';
 
+/**
+ * Standard Next.js instrumentation entry point.
+ * Initializes Sentry for Node.js and Edge runtimes.
+ */
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     Sentry.init({
@@ -45,6 +49,13 @@ export async function register() {
   }
 }
 
+/**
+ * Handle request errors by reporting them to Sentry.
+ *
+ * @param err - The caught error
+ * @param request - Original request object
+ * @param context - Request context
+ */
 export async function onRequestError(
   err: unknown,
   request: unknown,
