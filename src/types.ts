@@ -9,7 +9,9 @@ export type DefensivePattern =
   | 'env-fallback'
   | 'unnecessary-guard'
   | 'any-parameter'
-  | 'any-return';
+  | 'any-return'
+  | 'sparse-type'
+  | 'optional-parameter';
 
 export interface ContractEnforcementIssue extends Issue {
   type: IssueType.ContractGap;
@@ -27,6 +29,8 @@ export interface PatternCounts {
   'unnecessary-guard': number;
   'any-parameter': number;
   'any-return': number;
+  'sparse-type': number;
+  'optional-parameter': number;
 }
 
 export const ZERO_COUNTS: PatternCounts = {
@@ -39,6 +43,8 @@ export const ZERO_COUNTS: PatternCounts = {
   'unnecessary-guard': 0,
   'any-parameter': 0,
   'any-return': 0,
+  'sparse-type': 0,
+  'optional-parameter': 0,
 };
 
 export interface ContractEnforcementOptions {

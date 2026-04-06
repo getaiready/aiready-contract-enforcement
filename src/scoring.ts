@@ -24,9 +24,14 @@ export function calculateContractEnforcementScore(
     counts['any-parameter'] +
     counts['any-return'];
   const fallbackCount =
-    counts['deep-optional-chain'] + counts['nullish-literal-default'];
+    counts['deep-optional-chain'] +
+    counts['nullish-literal-default'] +
+    counts['optional-parameter'];
   const errorCount = counts['swallowed-error'];
-  const boundaryCount = counts['env-fallback'] + counts['unnecessary-guard'];
+  const boundaryCount =
+    counts['env-fallback'] +
+    counts['unnecessary-guard'] +
+    counts['sparse-type'];
 
   // Density: patterns per 1000 LOC
   const typeDensity = (typeEscapeCount / loc) * 1000;
@@ -77,7 +82,7 @@ export function calculateContractEnforcementScore(
   }
   if (boundaryValidationScore < 60) {
     recommendations.push(
-      `Add boundary validation (${boundaryCount} gaps): use a Zod schema for env vars and API inputs instead of inline fallbacks.`
+      `Add boundary validation (${boundaryCount} gaps): use a Zod schema for env vars and API inputs instead of inline fallbacks, and tighten sparse types.`
     );
   }
 

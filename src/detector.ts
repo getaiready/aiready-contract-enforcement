@@ -48,6 +48,10 @@ function getSuggestion(pattern: DefensivePattern): string {
       return 'Define a proper type for this parameter instead of `any`.';
     case 'any-return':
       return 'Define a proper return type instead of `any`.';
+    case 'sparse-type':
+      return 'Minimize optional properties; use required properties with default values or discriminated unions for better clarity.';
+    case 'optional-parameter':
+      return 'Avoid optional parameters in internal functions; use default values or overloads to maintain strictness.';
   }
 }
 
@@ -170,8 +174,36 @@ function isSwallowedCatch(
     }
     if (stmt.type === 'ThrowStatement') return false;
   }
-
   return false;
+}
+
+function isExported(node: TSESTree.Node): boolean {
+  let current: TSESTree.Node | undefined = node;
+  while (current) {
+    if (
+      current.type === 'ExportNamedDeclaration' ||
+      current.type === 'ExportDefaultDeclaration'
+    ) {
+      return true;
+    }
+    // Functions can be inside a block, so stop if we hit one
+    if (current.type === 'BlockStatement') break;
+    current = current.parent;
+  }
+  return false;
+}
+
+function getTypedProperties(node: TSESTree.Node): TSESTree.Node[] {
+  if (node.type === 'TSInterfaceDeclaration') {
+    return node.body.body;
+  }
+  if (
+    node.type === 'TSTypeAliasDeclaration' &&
+    node.typeAnnotation.type === 'TSTypeLiteral'
+  ) {
+    return node.typeAnnotation.members;
+  }
+  return [];
 }
 
 export function detectDefensivePatterns(
@@ -227,6 +259,7 @@ export function detectDefensivePatterns(
     if (!node || typeof node !== 'object') return;
 
     markFunctionParamNodes(node);
+    (node as any).parent = _parent;
 
     // Pattern: as any
     if (
@@ -445,6 +478,64 @@ export function detectDefensivePatterns(
               fnNode.returnType.loc.start.line,
               fnNode.returnType.loc.start.column,
               getLineContent(code, fnNode.returnType.loc.start.line)
+            )
+          );
+        }
+      }
+
+      // Pattern: optional parameter in internal functions
+      if (!isExported(node)) {
+        for (const param of node.params) {
+          if ('optional' in param && param.optional) {
+            counts['optional-parameter']++;
+            issues.push(
+              makeIssue(
+                'optional-parameter',
+                Severity.Minor,
+                'Optional parameter in internal function — use default values or overloads for better grounding',
+                filePath,
+                param.loc.start.line,
+                param.loc.start.column,
+                getLineContent(code, param.loc.start.line)
+              )
+            );
+          }
+        }
+      }
+    }
+
+    // Pattern: sparse type (too many optional properties)
+    if (
+      node.type === 'TSInterfaceDeclaration' ||
+      node.type === 'TSTypeAliasDeclaration'
+    ) {
+      const properties = getTypedProperties(node);
+      const totalProps = properties.filter(
+        (p) => p.type === 'TSPropertySignature'
+      ).length;
+      if (totalProps >= 3) {
+        const optionalProps = properties.filter(
+          (p) => p.type === 'TSPropertySignature' && p.optional
+        ).length;
+        const ratio = optionalProps / totalProps;
+
+        if (ratio > 0.25) {
+          let sev = Severity.Info;
+          if (ratio > 0.75) sev = Severity.Major;
+          else if (ratio > 0.5) sev = Severity.Minor;
+
+          counts['sparse-type']++;
+          issues.push(
+            makeIssue(
+              'sparse-type',
+              sev,
+              `Sparse type detected: ${optionalProps} of ${totalProps} properties (${Math.round(
+                ratio * 100
+              )}%) are optional`,
+              filePath,
+              node.loc.start.line,
+              node.loc.start.column,
+              getLineContent(code, node.loc.start.line)
             )
           );
         }

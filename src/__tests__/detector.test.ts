@@ -157,4 +157,64 @@ describe('detectDefensivePatterns', () => {
     expect(result.counts['env-fallback']).toBe(1);
     expect(result.counts['swallowed-error']).toBe(1);
   });
+
+  it('detects sparse types (high ratio of optional properties)', () => {
+    const code = `
+      interface LooseType {
+        id: string;
+        name?: string;
+        description?: string;
+        metadata?: Record<string, any>;
+      }
+    `;
+    const result = detectDefensivePatterns(filePath, code);
+    expect(result.counts['sparse-type']).toBe(1);
+    // 3 out of 4 properties are optional (75%) -> severity should be Minor (as per 50-75% bracket)
+    expect(result.issues[0].severity).toBe('minor');
+  });
+
+  it('detects major sparse types (> 75% optionality)', () => {
+    const code = `
+      interface VeryLooseType {
+        id?: string;
+        name?: string;
+        description?: string;
+        metadata?: any;
+      }
+    `;
+    const result = detectDefensivePatterns(filePath, code);
+    expect(result.counts['sparse-type']).toBe(1);
+    expect(result.issues[0].severity).toBe('major');
+  });
+
+  it('does not flag types with few properties (< 3)', () => {
+    const code = `
+      interface SmallType {
+        id?: string;
+        name?: string;
+      }
+    `;
+    const result = detectDefensivePatterns(filePath, code);
+    expect(result.counts['sparse-type']).toBe(0);
+  });
+
+  it('detects optional parameters in internal functions', () => {
+    const code = `
+      function internalFn(id: string, options?: any) {
+        return id;
+      }
+    `;
+    const result = detectDefensivePatterns(filePath, code);
+    expect(result.counts['optional-parameter']).toBe(1);
+  });
+
+  it('does not flag optional parameters in exported functions', () => {
+    const code = `
+      export function publicFn(id: string, options?: any) {
+        return id;
+      }
+    `;
+    const result = detectDefensivePatterns(filePath, code);
+    expect(result.counts['optional-parameter']).toBe(0);
+  });
 });
