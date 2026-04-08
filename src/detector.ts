@@ -206,6 +206,78 @@ function getTypedProperties(node: TSESTree.Node): TSESTree.Node[] {
   return [];
 }
 
+function isInsideCliOptions(node: TSESTree.Node): boolean {
+  let current: TSESTree.Node | undefined = node;
+  while (current) {
+    if (
+      (current.type === 'Property' || current.type === 'PropertyDefinition') &&
+      current.key.type === 'Identifier' &&
+      current.key.name === 'getCliOptions'
+    ) {
+      return true;
+    }
+    // Also ignore common commander action handlers
+    if (
+      current.type === 'CallExpression' &&
+      current.callee.type === 'MemberExpression' &&
+      current.callee.property.type === 'Identifier' &&
+      current.callee.property.name === 'action'
+    ) {
+      return true;
+    }
+    current = (current as any).parent as TSESTree.Node | undefined;
+  }
+  return false;
+}
+
+function isSafeLookup(node: TSESTree.Node): boolean {
+  // Common safe properties to access even with optional chaining
+  const safeProps = new Set(['name', 'label', 'id', 'title', 'description']);
+
+  let current: TSESTree.Node | undefined = node;
+
+  // Unwrap ChainExpression
+  if (current.type === 'ChainExpression') {
+    current = current.expression;
+  }
+
+  // Check if it's a member expression ending in a safe property
+  if (current.type === 'MemberExpression') {
+    if (
+      current.property.type === 'Identifier' &&
+      safeProps.has(current.property.name)
+    ) {
+      return true;
+    }
+  }
+
+  // Ignore safe reporting/logging calls
+  current = node;
+  while (current) {
+    if (current.type === 'CallExpression') {
+      const callee = current.callee;
+      if (
+        callee.type === 'MemberExpression' &&
+        callee.object.type === 'Identifier' &&
+        (callee.object.name === 'console' || callee.object.name === 'chalk')
+      ) {
+        return true;
+      }
+      if (
+        callee.type === 'Identifier' &&
+        /log|print|report/i.test(callee.name)
+      ) {
+        return true;
+      }
+    }
+    // Ignore throw blocks
+    if (current.type === 'ThrowStatement') return true;
+    current = (current as any).parent;
+  }
+
+  return false;
+}
+
 export function detectDefensivePatterns(
   filePath: string,
   code: string,
@@ -222,7 +294,8 @@ export function detectDefensivePatterns(
     filePath.endsWith('.config.mts') ||
     filePath.endsWith('.config.mjs') ||
     filePath.includes('sst.config.ts') ||
-    filePath.endsWith('playwright.config.ts');
+    filePath.endsWith('playwright.config.ts') ||
+    filePath.includes('packages/cli/src/commands/');
 
   let ast: TSESTree.Program;
   try {
@@ -269,7 +342,9 @@ export function detectDefensivePatterns(
       // Ignore if it's acting on an SST resource or process.env, common "necessary escape hatches"
       if (
         !isSstResourceAccess(node.expression) &&
-        !isProcessEnvAccess(node.expression)
+        !isProcessEnvAccess(node.expression) &&
+        !isInsideCliOptions(node) &&
+        !isSafeLookup(node)
       ) {
         counts['as-any']++;
         issues.push(
@@ -294,7 +369,9 @@ export function detectDefensivePatterns(
       // Ignore if it's acting on an SST resource or process.env
       if (
         !isSstResourceAccess(node.expression) &&
-        !isProcessEnvAccess(node.expression)
+        !isProcessEnvAccess(node.expression) &&
+        !isInsideCliOptions(node) &&
+        !isSafeLookup(node)
       ) {
         counts['as-unknown']++;
         issues.push(
@@ -314,7 +391,11 @@ export function detectDefensivePatterns(
     // Pattern: deep optional chaining
     if (node.type === 'ChainExpression') {
       const depth = countOptionalChainDepth(node);
-      if (depth >= minChainDepth) {
+      if (
+        depth >= minChainDepth &&
+        !isInsideCliOptions(node) &&
+        !isSafeLookup(node)
+      ) {
         counts['deep-optional-chain']++;
         issues.push(
           makeIssue(
@@ -337,7 +418,12 @@ export function detectDefensivePatterns(
       isLiteral(node.right)
     ) {
       // Ignore if it's an SST Resource or process.env - the standard way to handle fallbacks
-      if (!isSstResourceAccess(node.left) && !isProcessEnvAccess(node.left)) {
+      if (
+        !isSstResourceAccess(node.left) &&
+        !isProcessEnvAccess(node.left) &&
+        !isInsideCliOptions(node) &&
+        !isSafeLookup(node)
+      ) {
         counts['nullish-literal-default']++;
         issues.push(
           makeIssue(
